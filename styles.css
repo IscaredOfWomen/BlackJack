@@ -1,0 +1,122 @@
+/* General page styling */
+body {
+  font-family: 'Arial', sans-serif;
+  background-color: #2f4f4f;
+  color: white;
+  margin: 0;
+  padding: 0;
+  background-image: url('https://www.transparenttextures.com/patterns/dark-mosaic.png');
+  background-repeat: repeat;
+}
+
+h1 {
+  background-color: #4CAF50;
+  color: gold;
+  padding: 20px;
+  margin: 0;
+  font-size: 2.5em;
+  text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.6);
+}
+
+/* Center the game container */
+.game-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-top: 50px;
+}
+
+/* Basic styles for cards */
+.card {
+  display: inline-block;
+  width: 70px;
+  height: 100px;
+  border: 1px solid #000;
+  background-color: #fff;
+  color: #333;
+  text-align: center;
+  margin: 10px;
+  line-height: 100px;
+  font-size: 24px;
+  font-weight: bold;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.hidden {
+  background-color: #777;
+  color: transparent;
+}
+
+/* Styling for totals and result messages */
+.totals, #money-display {
+  font-size: 1.4em;
+  font-weight: bold;
+  margin: 10px 0;
+  text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4);
+}
+
+#money-display {
+  color: #ff6347;
+  text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+}
+
+/* Button styling */
+button {
+  padding: 15px 30px;
+  margin: 10px;
+  font-size: 1.3em;
+  background-color: #28a745;
+  color: white;
+  border: 2px solid #4CAF50;
+  border-radius: 10px;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+  transition: all 0.3s ease;
+}
+
+button:disabled {
+  background-color: #777;
+  color: #555;
+  cursor: not-allowed;
+}
+
+button:hover:not(:disabled) {
+  background-color: #218838;
+  transform: translateY(-2px);
+}
+
+/* Layout for cards */
+.cards-container {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+}
+
+/* Bet and control section */
+#bet-section {
+  margin-top: 20px;
+  text-align: center;
+  font-size: 1.2em;
+}
+
+/* Bottom section with results */
+.bottom-section {
+  margin-top: 30px;
+  font-size: 1.2em;
+  color: #fff;
+}
+
+/* Game result messages */
+#result {
+  font-size: 1.7em;
+  font-weight: bold;
+  margin-top: 20px;
+  color: #ffcc00;
+  text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.6);
+}
+
+.game-over {
+  color: red;
+}
