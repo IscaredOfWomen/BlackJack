@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" href="assets/css/styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blackjack Game</title>
+  <style>
+    /* General page styling */
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #2f4f4f;
+      color: white;
+      margin: 0;
+      padding: 0;
+      background-image: url('https://www.transparenttextures.com/patterns/dark-mosaic.png');
+      background-repeat: repeat;
+    }
+
+    h1 {
+      background-color: #4CAF50;
+      color: gold;
+      padding: 20px;
+      margin: 0;
+      font-size: 2.5em;
+      text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.6);
+    }
+
+    /* Center the game container */
+    .game-container {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      margin-top: 50px;
+    }
+
+    /* Basic styles for cards */
+    .card {
+      display: inline-block;
+      width: 70px;
+      height: 100px;
+      border: 1px solid #000;
+      background-color: #fff;
+      color: #333;
+      text-align: center;
+      margin: 10px;
+      line-height: 100px;
+      font-size: 24px;
+      font-weight: bold;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    }
+
+    .hidden {
+      background-color: #777;
+      color: transparent;
+    }
+
+    /* Styling for totals and result messages */
+    .totals, #money-display {
+      font-size: 1.4em;
+      font-weight: bold;
+      margin: 10px 0;
+      text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4);
+    }
+
+    #money-display {
+      color: #ff6347;
+      text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Button styling */
+    button {
+      padding: 15px 30px;
+      margin: 10px;
+      font-size: 1.3em;
+      background-color: #28a745;
+      color: white;
+      border: 2px solid #4CAF50;
+      border-radius: 10px;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+      transition: all 0.3s ease;
+    }
+
+    button:disabled {
+      background-color: #777;
+      color: #555;
+      cursor: not-allowed;
+    }
+
+    button:hover:not(:disabled) {
+      background-color: #218838;
+      transform: translateY(-2px);
+    }
+
+    /* Layout for cards */
+    .cards-container {
+      display: flex;
+      justify-content: center;
+      margin: 20px 0;
+    }
+
+    /* Bet and control section */
+    #bet-section {
+      margin-top: 20px;
+      text-align: center;
+      font-size: 1.2em;
+    }
+
+    /* Bottom section with results */
+    .bottom-section {
+      margin-top: 30px;
+      font-size: 1.2em;
+      color: #fff;
+    }
+
+    /* Game result messages */
+    #result {
+      font-size: 1.7em;
+      font-weight: bold;
+      margin-top: 20px;
+      color: #ffcc00;
+      text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.6);
+    }
+
+    .game-over {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <h1>Blackjack Game</h1>
+
+  <div class="game-container">
+    <!-- Display money -->
+    <div id="money-display">Money: $100</div>
+
+    <!-- Display player and dealer cards -->
+    <div class="cards-container" id="player-cards"></div>
+    <div class="cards-container" id="dealer-cards"></div>
+
+    <!-- Display totals -->
+    <div class="totals" id="player-total">Player Total: 0</div>
+    <div class="totals" id="dealer-total">Dealer Total: ?</div>
+
+    <!-- Results -->
+    <div id="result"></div>
+
+    <!-- Bet input and buttons -->
+    <div id="bet-section">
+      <input type="number" id="bet-input" placeholder="Enter your bet" min="20" />
+      <button id="start-game" onclick="startGame()">Start Game</button>
+    </div>
+
+    <div>
+      <button id="hit" onclick="hit()" disabled>Hit</button>
+      <button id="stand" onclick="stand()" disabled>Stand</button>
+      <button id="double-down" onclick="doubleDown()" disabled>Double Down</button>
+      <button id="split" onclick="split()" disabled>Split</button>
+      <button id="restart" onclick="restartGame()">Restart</button>
+    </div>
+
+    <div class="bottom-section">
+      Player Wins: <span id="player-wins">0</span> | Dealer Wins: <span id="dealer-wins">0</span>
+    </div>
+  </div>
+
+  <script>
+    const suits = ['♥', '♦', '♣', '♠'];
+    const values = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+    let deck = [];
+    let playerHand = [];
+    let dealerHand = [];
+    let playerTotal = 0;
+    let dealerTotal = 0;
+    let isGameOver = false;
+    let currentBet = 0;
+    let playerMoney = 100;
+    let playerWins = 0;
+    let dealerWins = 0;
+    let canDoubleDown = false;
+    let canSplit = false;
+
+    function initializeDeck() {
+      deck = [];
+      for (let suit of suits) {
+        for (let value of values) {
+          deck.push({ suit, value });
+        }
+      }
+      deck = shuffle(deck);
+    }
+
+    function shuffle(deck) {
+      for (let i = deck.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [deck[i], deck[j]] = [deck[j], deck[i]];
+      }
+      return deck;
+    }
+
+    function getCardValue(card) {
+      if (card.value === 'A') return 11;
+      if (['K', 'Q', 'J'].includes(card.value)) return 10;
+      return parseInt(card.value);
+    }
+
+    function updateTotals() {
+      playerTotal = playerHand.reduce((sum, card) => sum + getCardValue(card), 0);
+      dealerTotal = dealerHand.reduce((sum, card) => sum + getCardValue(card), 0);
+    }
+
+    function showCards() {
+      const playerCardsDiv = document.getElementById('player-cards');
+      const dealerCardsDiv = document.getElementById('dealer-cards');
+
+      playerCardsDiv.innerHTML = '';
+      dealerCardsDiv.innerHTML = '';
+
+      playerHand.forEach(card => {
+        const cardDiv = document.createElement('div');
+        cardDiv.classList.add('card');
+        cardDiv.textContent = card.value + card.suit;
+        playerCardsDiv.appendChild(cardDiv);
+      });
+
+      dealerHand.forEach((card, index) => {
+        const cardDiv = document.createElement('div');
+        cardDiv.classList.add('card');
+        if (index === 0 && !isGameOver) {
+          cardDiv.textContent = '??';
+          cardDiv.classList.add('hidden');
+        } else {
+          cardDiv.textContent = card.value + card.suit;
+        }
+        dealerCardsDiv.appendChild(cardDiv);
+      });
+
+      document.getElementById('player-total').textContent = `Player Total: ${playerTotal}`;
+      document.getElementById('dealer-total').textContent = isGameOver
+        ? `Dealer Total: ${dealerTotal}`
+        : `Dealer Total: ?`;
+    }
+
+    function startGame() {
+      const betInput = document.getElementById('bet-input');
+      currentBet = parseInt(betInput.value);
+
+      if (isNaN(currentBet) || currentBet < 20 || currentBet > 5000) {
+        alert("Bet must be between $20 and $5000.");
+        return;
+      }
+
+      if (currentBet > playerMoney) {
+        alert("You don't have enough money to place that bet.");
+        return;
+      }
+
+      // Disable Start Game button and bet input during game
+      document.getElementById('start-game').disabled = true;
+      document.getElementById('bet-input').disabled = true;
+
+      initializeDeck();
+      playerHand = [deck.pop(), deck.pop()];
+      dealerHand = [deck.pop(), deck.pop()];
+      isGameOver = false;
+      updateTotals();
+
+      if (playerTotal === 21) {
+        endGame('Blackjack! Player wins!');
+        return;
+      }
+
+      showCards();
+      document.getElementById('result').textContent = '';
+      document.getElementById('hit').disabled = false;
+      document.getElementById('stand').disabled = false;
+      document.getElementById('double-down').disabled = false;
+      document.getElementById('split').disabled = true;
+    }
+
+    function hit() {
+      if (isGameOver) return;
+      playerHand.push(deck.pop());
+      updateTotals();
+      showCards();
+      if (playerTotal > 21) {
+        endGame('Player busts! Dealer wins.');
+      }
+    }
+
+    function stand() {
+      if (isGameOver) return;
+      while (dealerTotal < 17) {
+        dealerHand.push(deck.pop());
+        updateTotals();
+      }
+
+      if (dealerTotal > 21) {
+        endGame('Dealer busts! Player wins!');
+      } else if (playerTotal > dealerTotal) {
+        endGame('Player wins!');
+      } else if (playerTotal < dealerTotal) {
+        endGame('Dealer wins!');
+      } else {
+        endGame("It's a tie!");
+      }
+    }
+
+    function doubleDown() {
+      if (isGameOver || playerMoney < currentBet * 2) return;
+      currentBet *= 2;
+      hit();
+      if (!isGameOver) stand();
+    }
+
+    function split() {
+      // Optional: Implement split functionality
+    }
+
+    function restartGame() {
+      // Reset game state
+      playerHand = [];
+      dealerHand = [];
+      playerTotal = 0;
+      dealerTotal = 0;
+      isGameOver = false;
+      currentBet = 0;
+      playerMoney = 100;
+      document.getElementById('bet-input').disabled = false;
+      document.getElementById('start-game').disabled = false;
+      document.getElementById('hit').disabled = true;
+      document.getElementById('stand').disabled = true;
+      document.getElementById('double-down').disabled = true;
+      document.getElementById('split').disabled = true;
+      document.getElementById('result').textContent = '';
+      showCards();
+      document.getElementById('money-display').textContent = `Money: $${playerMoney}`;
+    }
+
+    function endGame(resultMessage) {
+      isGameOver = true;
+
+      // Reveal the dealer's cards
+      const dealerCardsDiv = document.getElementById('dealer-cards');
+      dealerCardsDiv.innerHTML = ''; // Clear out the current dealer cards
+
+      dealerHand.forEach(card => {
+        const cardDiv = document.createElement('div');
+        cardDiv.classList.add('card');
+        cardDiv.textContent = card.value + card.suit;
+        dealerCardsDiv.appendChild(cardDiv);
+      });
+
+      // Update the dealer's total
+      updateTotals();
+      document.getElementById('dealer-total').textContent = `Dealer Total: ${dealerTotal}`;
+
+      // Update result and win counters
+      document.getElementById('result').textContent = resultMessage;
+      document.getElementById('player-wins').textContent = playerWins;
+      document.getElementById('dealer-wins').textContent = dealerWins;
+
+      // Update money display after the game ends
+      if (resultMessage.includes("Player wins")) {
+        playerMoney += currentBet;
+        playerWins++;
+      } else if (resultMessage.includes("Dealer wins")) {
+        playerMoney -= currentBet;
+        dealerWins++;
+      }
+      
+      document.getElementById('money-display').textContent = `Money: $${playerMoney}`;
+
+      // Re-enable the start game button and the bet input
+      document.getElementById('start-game').disabled = false; // Re-enable the start game button
+      document.getElementById('bet-input').disabled = false;  // Re-enable the bet input after game ends
+    }
+  </script>
+</body>
+</html>
