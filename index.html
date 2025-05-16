@@ -328,6 +328,7 @@
       dealerTotal = 0;
       isGameOver = false;
       currentBet = 0;
+      playerMoney = 100;
       document.getElementById('bet-input').disabled = false;
       document.getElementById('start-game').disabled = false;
       document.getElementById('hit').disabled = true;
@@ -338,7 +339,6 @@
       showCards();
       document.getElementById('money-display').textContent = `Money: $${playerMoney}`;
     }
-
     function endGame(resultMessage) {
       isGameOver = true;
       document.getElementById('result').textContent = resultMessage;
@@ -353,8 +353,7 @@
         dealerWins++;
       }
       document.getElementById('money-display').textContent = `Money: $${playerMoney}`;
-      document.getElementById('start-game').disabled = false; // Re-enable start game button after game ends
-      document.getElementById('bet-input').disabled = false;
+      document.getElementById('start-game').disabled = false; // Re-enable start game button after game end
     }
   </script>
 </body>
